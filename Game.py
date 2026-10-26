@@ -219,7 +219,7 @@ def draw_platforms():
 
 def draw_walls():
     wall_height = 25.0  # Height of the walls
-    ground_size = 7.0   # Size of the ground (matches your GROUND_SIZE)
+    ground_size = 7.0   # Size of the ground
 
     glColor3f(0.5, 0.5, 0.5)  # Gray color for walls
     glBegin(GL_QUADS)
