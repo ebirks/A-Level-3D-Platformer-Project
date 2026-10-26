@@ -1,17 +1,16 @@
-import math
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
-from OpenGL.GLU import *
 from OpenGL.GLUT import *
+from OpenGL.GLU import *
 import time
 import math
 import sqlite3
 from datetime import datetime
 
 # Constants
-WINDOW_WIDTH = 1536
-WINDOW_HEIGHT = 864
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
 PLAYER_START_POS = [0, 2, 0]
 GROUND_SIZE = 7
 GRAVITY = -0.02
@@ -23,21 +22,21 @@ LEVEL_COMPLETED = False  # Track if level is completed
 MAX_CHECKPOINT_RESETS = 3
 PLATFORMS = [
     {'pos': [2, 1, -2], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},    # First platform
-    {'pos': [-2, 2, -3], 'size': [2, 0.2, 2], 'trap': True, 'boost': False, 'checkpoint': False},     # Trap platform
-    {'pos': [2, 3, -4], 'size': [2, 0.2, 2], 'trap': False, 'boost': True, 'checkpoint': False},      # Boost platform
-    {'pos': [2, 7, -3], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},     # Fourth platform
-    {'pos': [3, 8, -1], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},     # Fifth platform
-    {'pos': [1, 9, 1], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': True},      # Checkpoint platform
-    {'pos': [-1, 10, 2], 'size': [2, 0.2, 2], 'trap': True, 'boost': False, 'checkpoint': False},      # Trap platform
-    {'pos': [1, 11, -1], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},      # Sixth platform
-    {'pos': [-2, 12, -1], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},      # Seventh platform
-    {'pos': [-4, 13, 2], 'size': [2, 0.2, 2], 'trap': False, 'boost': True, 'checkpoint': False},      # Boost platform
-    {'pos': [0, 16, 3], 'size': [2, 0.2, 2], 'trap': True, 'boost': False, 'checkpoint': False},      # Trap platform
-    {'pos': [-2, 17, 0], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': True},      # Checkpoint platform
-    {'pos': [-5, 18, 1], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},      # Eighth platform
-    {'pos': [-3, 19, 2], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},      # Ninth platform
-    {'pos': [-1, 20, 4], 'size': [2, 0.2, 2], 'trap': False, 'boost': True, 'checkpoint': False},      # Boost platform
-    {'pos': [-1, 24, 3], 'size': [2, 0.2, 2], 'trap': True, 'boost': False, 'checkpoint': False},      # Trap platform
+    {'pos': [-2, 2, -3], 'size': [2, 0.2, 2], 'trap': True, 'boost': False, 'checkpoint': False},    # Trap platform
+    {'pos': [2, 3, -4], 'size': [2, 0.2, 2], 'trap': False, 'boost': True, 'checkpoint': False},     # Boost platform
+    {'pos': [2, 7, -3], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},    # Fourth platform
+    {'pos': [3, 8, -1], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},    # Fifth platform
+    {'pos': [1, 9, 1], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': True},   # Checkpoint platform
+    {'pos': [-1, 10, 2], 'size': [2, 0.2, 2], 'trap': True, 'boost': False, 'checkpoint': False},    # Trap platform
+    {'pos': [1, 11, -1], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},    # Sixth platform
+    {'pos': [-2, 12, -1], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},    # Seventh platform
+    {'pos': [-4, 13, 2], 'size': [2, 0.2, 2], 'trap': False, 'boost': True, 'checkpoint': False},     # Boost platform
+    {'pos': [0, 16, 3], 'size': [2, 0.2, 2], 'trap': True, 'boost': False, 'checkpoint': False},    # Trap platform
+    {'pos': [-2, 17, 0], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': True},   # Checkpoint platform
+    {'pos': [-5, 18, 1], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},    # Eighth platform
+    {'pos': [-3, 19, 2], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False},    # Ninth platform
+    {'pos': [-1, 20, 4], 'size': [2, 0.2, 2], 'trap': False, 'boost': True, 'checkpoint': False},     # Boost platform
+    {'pos': [-1, 24, 3], 'size': [2, 0.2, 2], 'trap': True, 'boost': False, 'checkpoint': False},    # Trap platform
     {'pos': [0, 25, 0], 'size': [2, 0.2, 2], 'trap': False, 'boost': False, 'checkpoint': False, 'finish': True},  # Finish platform
 ]
 SCORE_SAVED = False
@@ -108,7 +107,7 @@ def load_texture(filename):
 
         glBindTexture(GL_TEXTURE_2D, texture)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.get_width(), img.get_height(),
-                     0, GL_RGBA, GL_UNSIGNED_BYTE, img_data)
+                    0, GL_RGBA, GL_UNSIGNED_BYTE, img_data)
 
         # Set texture parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
@@ -118,6 +117,7 @@ def load_texture(filename):
 
         print(f"Successfully loaded texture: {texture}")
         return texture
+
     except pygame.error as e:
         print(f"Couldn't load texture {filename}: {e}")
         print("Make sure the image file exists and is in the correct format")
@@ -125,7 +125,6 @@ def load_texture(filename):
     except Exception as e:
         print(f"Unexpected error loading texture: {e}")
         return None
-
 
 def draw_ground():
     if ground_texture is None:
@@ -151,7 +150,6 @@ def draw_ground():
 
     glDisable(GL_TEXTURE_2D)
 
-
 def draw_platforms():
     current_time = time.time()
     for platform in PLATFORMS:
@@ -160,6 +158,7 @@ def draw_platforms():
         if platform.get('trap') and platform_pos in trap_timers:
             if current_time - trap_timers[platform_pos] > TRAP_DURATION:
                 continue
+
         glPushMatrix()
         glTranslatef(*platform['pos'])
         glScalef(*platform['size'])
@@ -216,10 +215,9 @@ def draw_platforms():
         glEnd()
         glPopMatrix()
 
-
 def draw_walls():
     wall_height = 25.0  # Height of the walls
-    ground_size = 7.0   # Size of the ground
+    ground_size = 7.0  # Size of the ground
 
     glColor3f(0.5, 0.5, 0.5)  # Gray color for walls
     glBegin(GL_QUADS)
@@ -250,45 +248,49 @@ def draw_walls():
 
     glEnd()
 
-
-def init_mouse_handling():
-    """Initializes mouse handling by hiding the cursor and locking it to the center of the window."""
-    pygame.mouse.set_visible(False)  # Hide the mouse cursor
-    pygame.mouse.set_pos(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)  # Recenter the mouse at the center of the screen
-
-
 def handle_camera():
     global camera_angle_x, camera_angle_y, player_rotation
 
     # Get mouse movement
     mouse_rel = pygame.mouse.get_rel()
-
-    # Apply the mouse movement to the camera angles
     camera_angle_x -= mouse_rel[0] * camera_sensitivity
     camera_angle_y -= mouse_rel[1] * camera_sensitivity
 
-    # Limit vertical camera rotation
-    camera_angle_y = max(min(camera_angle_y, math.pi / 3), -math.pi / 3)
-
-    # Sync player rotation with camera angle
+    # Keep player rotation synced with camera
     player_rotation = camera_angle_x
 
-    # Recenter the mouse after processing the movement to prevent it from leaving the window
-    pygame.mouse.set_pos(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+    # Limit vertical camera rotation
+    camera_angle_y = max(min(camera_angle_y, math.pi/3), -math.pi/3)
 
-    # Calculate camera position and look direction (unchanged from your original code)
+    # Calculate camera position to orbit around the cube
     camera_distance = 5
+
+    # Calculate camera direction vector (from player to camera)
     dir_x = math.cos(camera_angle_y) * math.sin(camera_angle_x)
     dir_y = math.sin(camera_angle_y)
     dir_z = math.cos(camera_angle_y) * math.cos(camera_angle_x)
+
+    # Calculate initial camera position
     camera_x = player_pos[0] + camera_distance * dir_x
     camera_y = player_pos[1] + camera_distance * dir_y
     camera_z = player_pos[2] + camera_distance * dir_z
 
+    # Prevent camera from going below ground
     if camera_y < 0.5:
         camera_y = 0.5
 
-    # Camera collision detection (unchanged from your original code)
+    # Check collision with platforms
+    for platform in PLATFORMS:
+        # Calculate platform boundaries
+        platform_min_x = platform['pos'][0] - platform['size'][0]/2
+        platform_max_x = platform['pos'][0] + platform['size'][0]/2
+        platform_min_z = platform['pos'][2] - platform['size'][2]/2
+        platform_max_z = platform['pos'][2] + platform['size'][2]/2
+        platform_top = platform['pos'][1] + platform['size'][1]
+
+
+
+    # Add camera wall collision detection
     wall_buffer = 0.5
     if camera_x > GROUND_SIZE - wall_buffer:
         camera_x = GROUND_SIZE - wall_buffer
@@ -306,7 +308,6 @@ def handle_camera():
         player_pos[0], player_pos[1], player_pos[2],
         0, 1, 0
     )
-
 
 def handle_movement():
     global player_pos, player_velocity, is_jumping, is_paused, current_checkpoint, LEVEL_COMPLETED
@@ -385,15 +386,22 @@ def handle_movement():
                     LEVEL_COMPLETED = True
                     is_paused = True
 
-            wall_buffer = 0.5  # Distance from wall to stop player
-            if player_pos[0] > GROUND_SIZE - wall_buffer:
-                player_pos[0] = GROUND_SIZE - wall_buffer
-            if player_pos[0] < -GROUND_SIZE + wall_buffer:
-                player_pos[0] = -GROUND_SIZE + wall_buffer
-            if player_pos[2] > GROUND_SIZE - wall_buffer:
-                player_pos[2] = GROUND_SIZE - wall_buffer
-            if player_pos[2] < -GROUND_SIZE + wall_buffer:
-                player_pos[2] = -GROUND_SIZE + wall_buffer
+        wall_buffer = 0.5  # Distance from wall to stop player
+        if player_pos[0] > GROUND_SIZE - wall_buffer:
+            player_pos[0] = GROUND_SIZE - wall_buffer
+        if player_pos[0] < -GROUND_SIZE + wall_buffer:
+            player_pos[0] = -GROUND_SIZE + wall_buffer
+        if player_pos[2] > GROUND_SIZE - wall_buffer:
+            player_pos[2] = GROUND_SIZE - wall_buffer
+        if player_pos[2] < -GROUND_SIZE + wall_buffer:
+            player_pos[2] = -GROUND_SIZE + wall_buffer
+
+        # Check if player falls off the map (for simplicity)
+        if abs(player_pos[0]) > 5 or abs(player_pos[2]) > 5 or player_pos[1] < -10:
+            if current_checkpoint:
+                player_pos = current_checkpoint.copy()  # Respawn at checkpoint
+            else:
+                player_pos = [0, 2, 0]
 
 
 def draw_player():
@@ -442,7 +450,6 @@ def draw_player():
     glEnd()
     glPopMatrix()
 
-
 def reset_to_checkpoint():
     global player_pos, trap_timers, current_checkpoint, SCORE_SAVED, checkpoint_resets_remaining
 
@@ -464,7 +471,6 @@ def reset_to_checkpoint():
     # Decrease remaining resets
     checkpoint_resets_remaining -= 1
 
-
 def draw_resets_remaining():
     font = pygame.font.SysFont('Arial', 24)
     resets_text = font.render(f"Resets: {checkpoint_resets_remaining}", True, (255, 255, 255))
@@ -476,12 +482,12 @@ def draw_resets_remaining():
 
     draw_2d_text([resets_surface], [(x, y)], [(resets_surface.get_width(), resets_surface.get_height())])
 
-
 def draw_timer():
     global elapsed_time
     if not is_paused:
         current_time = time.time()
         elapsed_time = current_time - start_time
+
     font = pygame.font.SysFont('Arial', 24)
     timer_text = font.render(f"Time: {int(elapsed_time)}", True, (255, 255, 255))
     timer_surface = pygame.Surface((timer_text.get_width(), timer_text.get_height()), pygame.SRCALPHA)
@@ -491,7 +497,6 @@ def draw_timer():
     y = 10
 
     draw_2d_text([timer_surface], [(x, y)], [(timer_surface.get_width(), timer_surface.get_height())])
-
 
 def pause_menu():
     font = pygame.font.SysFont('Arial', 36)
@@ -503,7 +508,6 @@ def pause_menu():
     y = (WINDOW_HEIGHT - pause_surface.get_height()) // 2
 
     draw_2d_text([pause_surface], [(x, y)], [(pause_surface.get_width(), pause_surface.get_height())])
-
 
 def draw_completion_screen():
     global elapsed_time, SCORE_SAVED
@@ -552,10 +556,9 @@ def draw_completion_screen():
 
     draw_2d_text(surfaces, positions, sizes)
 
-
 def init_database():
     """Initialize the database and create the high scores table if it doesn't exist."""
-    conn = sqlite3.connect('game_scores.db')
+    conn = sqlite3.connect('game_scores_project_ver.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS high_scores
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -564,7 +567,6 @@ def init_database():
                   date TEXT)''')
     conn.commit()
     conn.close()
-
 
 def save_score(completion_time):
     """Save the score to the database."""
@@ -578,7 +580,6 @@ def save_score(completion_time):
     conn.commit()
     conn.close()
 
-
 def get_top_scores(limit=5):
     """Retrieve the top scores from the database."""
     conn = sqlite3.connect('game_scores.db')
@@ -587,7 +588,6 @@ def get_top_scores(limit=5):
     scores = c.fetchall()
     conn.close()
     return scores
-
 
 def reset_database():
     """Reset the high scores database by deleting all records."""
@@ -601,7 +601,6 @@ def reset_database():
     except sqlite3.Error as e:
         print(f"Error resetting database: {e}")
 
-
 def get_username():
     username = ""
     input_active = True
@@ -609,6 +608,7 @@ def get_username():
 
     while input_active:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
@@ -633,7 +633,6 @@ def get_username():
         pygame.display.flip()
 
     return username if username else "Player"
-
 
 def draw_2d_text(surfaces, positions, sizes):
     """Helper function to draw 2D text with proper matrix handling"""
@@ -687,7 +686,6 @@ def draw_2d_text(surfaces, positions, sizes):
     glMatrixMode(GL_MODELVIEW)
     glPopMatrix()
 
-
 def handle_events():
     global is_paused, start_time, stored_time, elapsed_time, LEVEL_COMPLETED, pause_start_time, checkpoint_resets_remaining
     for event in pygame.event.get():
@@ -719,8 +717,6 @@ def handle_events():
 
             if event.key == K_r and event.mod & pygame.KMOD_CTRL:
                 reset_database()
-
-
 def cleanup():
     global ground_texture
     try:
@@ -731,7 +727,6 @@ def cleanup():
     finally:
         pygame.quit()
 
-
 def resize_window(width, height):
     if height == 0:
         height = 1
@@ -741,7 +736,6 @@ def resize_window(width, height):
     gluPerspective(45.0, float(width)/float(height), 0.1, 50.0)
     glMatrixMode(GL_MODELVIEW)
 
-
 def main():
     global ground_texture, is_paused
     ground_texture = load_texture('grass.jpg')
@@ -749,8 +743,6 @@ def main():
 
     # Initialize the database
     init_database()
-
-    init_mouse_handling()
 
     pygame.mouse.set_visible(False)  # Hide the cursor
     pygame.event.set_grab(True)      # Lock the mouse to the window
@@ -795,7 +787,6 @@ def main():
         print(f"An error occurred: {e}")
         cleanup()
         return
-
 
 if __name__ == '__main__':
     main()
